@@ -1,16 +1,9 @@
-import pool from "../db.js";
+import { findActiveByKey } from "../repositories/serviceRepository.js";
 
 const getServiceByKey = async (req, res) => {
   const serviceKey = req.params.service_key;
-  // Query database
   try {
-    const result = await pool.query(
-      `SELECT id, service_key, name, description
-       FROM services
-       WHERE service_key = $1
-         AND is_active = TRUE`,
-      [serviceKey],
-    );
+    const services = await findActiveByKey(serviceKey);
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
@@ -20,7 +13,7 @@ const getServiceByKey = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Service retrieved successfully",
-      data: result.rows[0],
+      data: services,
     });
   } catch (error) {
     console.error("Failed to retrieve service", error.message);
