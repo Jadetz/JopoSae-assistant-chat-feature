@@ -14,17 +14,16 @@ const findAllActive = async () => {
 };
 
 const findActiveByKey = async (serviceKey) => {
-  const result = await pool.query(
-    `
+  const query = `
     SELECT 
     id,
     service_key,
     name,
     description
     FROM services  
-    WHERE service_key = $1 AND is_active = TRUE`,
-    [serviceKey],
-  );
+    WHERE service_key = $1 AND is_active = TRUE`;
+  const values = [serviceKey];
+  const result = await pool.query(query, values);
   return result.rows[0] ?? null;
 };
 

@@ -1,22 +1,22 @@
 import express from "express";
 import cors from "cors";
 import pool from "./db.js";
-import serviceKeyRoutes from "./routes/serviceKeyRoutes.js";
 import faqRoutes from "./routes/faqRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
+import consultationRoutes from "./routes/consultationRoutes.js";
 const app = express();
 
 //middleware
 app.use(cors());
 app.use(express.json());
 // endpoint call
-app.use("/api/services", serviceKeyRoutes);
 app.use("/api/faqs", faqRoutes);
 app.use("/api/services", serviceRoutes);
+app.use("/api/consultations", consultationRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({
-    succes: true,
+    success: true,
     message: "Server Ok Masseh",
   });
 });
@@ -26,7 +26,7 @@ app.get("/api/health/db", async (req, res) => {
     const result = await pool.query("SELECT NOW () AS server_time");
 
     res.status(200).json({
-      succes: true,
+      success: true,
       message: "Database connected succesfully!",
       data: result.rows[0],
     });
@@ -34,7 +34,7 @@ app.get("/api/health/db", async (req, res) => {
     console.error("Database connection error", error.message);
 
     res.status(500).json({
-      succes: false,
+      success: false,
       message: "Database connection failed",
     });
   }
