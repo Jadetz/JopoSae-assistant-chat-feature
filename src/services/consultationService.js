@@ -11,7 +11,7 @@ const requestConsultation = async (conversationId, serviceKey) => {
   if (!conversation) {
     return {
       success: false,
-      message: "Percakapan tidak ditemukan",
+      message: "Mohon maaf, percakapan tidak ditemukan.",
     };
   }
 
@@ -19,13 +19,13 @@ const requestConsultation = async (conversationId, serviceKey) => {
   if (!service) {
     return {
       success: false,
-      message: "Layanan tidak tersedia",
+      message: "Mohon maaf, layanan tidak tersedia.",
     };
   }
   const consultation = await createConsultation(conversationId, service.id);
   return {
     success: true,
-    message: "Permintaan konsultasi berhasil dibuat",
+    message: "Permintaan konsultasi berhasil dibuat.",
     data: consultation,
   };
 };
@@ -37,7 +37,7 @@ const getConsultations = async (status) => {
   if (normalizedStatus && !validStatuses.includes(normalizedStatus)) {
     return {
       success: false,
-      message: "Status konsultasi tidak valid",
+      message: "Mohon maaf, status konsultasi tidak valid.",
     };
   }
   const findConsultationResult = await findConsultations(
@@ -45,7 +45,7 @@ const getConsultations = async (status) => {
   );
   return {
     success: true,
-    message: "Daftar konsultasi berhasil diambil",
+    message: "Daftar konsultasi berhasil diambil.",
     data: findConsultationResult,
   };
 };
@@ -59,7 +59,7 @@ const getConsultationById = async (id) => {
     return {
       success: false,
       statusCode: 400,
-      message: "ID konsultasi tidak valid",
+      message: "Mohon maaf, ID konsultasi tidak valid.",
     };
   }
 
@@ -68,12 +68,12 @@ const getConsultationById = async (id) => {
     return {
       success: false,
       statusCode: 404,
-      message: "Konsultasi tidak ditemukan",
+      message: "Mohon maaf, data konsultasi tidak ditemukan.",
     };
   }
   return {
     success: true,
-    message: "Data konsultasi berhasil ditemukan",
+    message: "Data konsultasi berhasil ditemukan.",
     data: findConsultationByIdResult,
   };
 };
@@ -87,7 +87,7 @@ const requestUpdateConsultationStatus = async (id, status) => {
     return {
       success: false,
       statusCode: 400,
-      message: "ID konsultasi tidak valid",
+      message: "Mohon maaf, ID konsultasi tidak valid.",
     };
   }
   const validateStatus = ["pending", "link_generated", "closed", "cancelled"];
@@ -95,7 +95,7 @@ const requestUpdateConsultationStatus = async (id, status) => {
     return {
       success: false,
       statusCode: 400,
-      message: "Pesan status tidak valid",
+      message: "Mohon maaf, status konsultasi tidak valid.",
     };
   }
   const updateResult = await updateConsultationStatus(numericId, status);
@@ -103,14 +103,14 @@ const requestUpdateConsultationStatus = async (id, status) => {
     return {
       success: false,
       statusCode: 404,
-      message: "Pesan konsultasi tidak ditemukan",
+      message: "Mohon maaf, data konsultasi tidak ditemukan.",
     };
   }
 
   return {
     success: true,
     statusCode: 200,
-    message: "Pesan berhasil, dan data berisi hasil update",
+    message: "Status konsultasi berhasil diperbarui.",
     data: updateResult,
   };
 };

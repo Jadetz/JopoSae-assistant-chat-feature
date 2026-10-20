@@ -24,7 +24,7 @@ const handleCreateConsultation = async (req, res) => {
       return res.status(400).json({
         success: false,
         message:
-          "ConversationId harus integer positif dan serviceKey wajib berupa teks",
+          "Mohon periksa kembali data Anda: conversationId harus berupa bilangan bulat positif dan serviceKey wajib diisi.",
       });
     }
     console.log("[Consultation Controller] Memanggil Service");
@@ -47,7 +47,7 @@ const handleCreateConsultation = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Terjadi kesalahan pada server",
+      message: "Mohon maaf, terjadi kesalahan pada server. Silakan coba beberapa saat lagi.",
     });
   }
 };
@@ -65,7 +65,7 @@ const handleGetConsultations = async (req, res) => {
     console.error("Get consultations error", error);
     return res.status(500).json({
       success: false,
-      message: "Terjadi kesalahan pada server",
+      message: "Mohon maaf, terjadi kesalahan pada server. Silakan coba beberapa saat lagi.",
     });
   }
 };
@@ -87,7 +87,7 @@ const handleGetConsultationById = async (req, res) => {
     console.error("Get consultation by id error", error);
     return res.status(500).json({
       success: false,
-      message: "Error tak terduga dari server",
+      message: "Mohon maaf, terjadi kesalahan pada server. Silakan coba beberapa saat lagi.",
     });
   }
 };
@@ -108,7 +108,7 @@ const handleUpdateConsultationStatus = async (req, res) => {
     console.error("Update status consultation error", error);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: "Mohon maaf, terjadi kesalahan pada server. Silakan coba beberapa saat lagi.",
     });
   }
 };

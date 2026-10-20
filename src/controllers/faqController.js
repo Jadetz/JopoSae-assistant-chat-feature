@@ -5,15 +5,15 @@ const getAllFaqs = async (req, res) => {
     const getFaqsResult = await getFaqs();
     res.status(200).json({
       success: true,
-      message: "FAQs retrieved succesfully",
+      message: "Daftar FAQ berhasil diambil.",
       data: getFaqsResult,
     });
   } catch (error) {
     console.error("Failed retrieved successfully", error.message);
 
     res.status(500).json({
-      status: false,
-      message: "Failed to retrieve service",
+      success: false,
+      message: "Mohon maaf, daftar FAQ gagal diambil.",
     });
   }
 };

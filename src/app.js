@@ -27,7 +27,7 @@ app.get("/api/health/db", async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Database connected succesfully!",
+      message: "Koneksi database berhasil.",
       data: result.rows[0],
     });
   } catch (error) {
@@ -35,7 +35,7 @@ app.get("/api/health/db", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: "Database connection failed",
+      message: "Mohon maaf, koneksi database gagal.",
     });
   }
 });

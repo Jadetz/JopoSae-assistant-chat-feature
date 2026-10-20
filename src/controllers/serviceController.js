@@ -8,14 +8,14 @@ const getServices = async (req, res) => {
     const services = await findAllActive();
     res.status(200).json({
       success: true,
-      message: "Service retrieved successfully",
+      message: "Daftar layanan berhasil diambil.",
       data: services,
     });
   } catch (error) {
     console.error("Failed to retrieve service", error.message);
     res.status(500).json({
       success: false,
-      message: "Failed to retrieve services",
+      message: "Mohon maaf, daftar layanan gagal diambil.",
     });
   }
 };
@@ -30,7 +30,7 @@ const getServiceByKey = async (req, res) => {
     if (!service) {
       return res.status(404).json({
         success: false,
-        message: "Layanan tidak ditemukan",
+        message: "Mohon maaf, layanan tidak ditemukan.",
       });
     }
 
@@ -43,7 +43,7 @@ const getServiceByKey = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Terjadi kesalahan pada server",
+      message: "Mohon maaf, terjadi kesalahan pada server. Silakan coba beberapa saat lagi.",
     });
   }
 };
