@@ -14,6 +14,6 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 MD/
-
+.claude/
 # WhatsApp session (Baileys auth state)
 auth_info/
