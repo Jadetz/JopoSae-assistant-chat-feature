@@ -1,9 +1,9 @@
 import "dotenv/config";
 import { startWhatsApp } from "./adapters/whatsApp/whatsAppClient.js";
 import { sendText } from "./adapters/whatsApp/messageSender.js";
-
+import { buildReply } from "./services/botService.js";
 const handleIncomingMessage = async (incoming, sock) => {
-  console.log("[bot] incoming", incoming);
+  console.log("[JopoSae Assistant Chat] incoming", incoming);
   if (incoming.messageType !== "text") {
     await sendText(
       sock,
@@ -12,8 +12,16 @@ const handleIncomingMessage = async (incoming, sock) => {
     );
     return;
   }
+  let reply;
+  try {
+    reply = await buildReply(incoming);
+  } catch (error) {
+    console.error("[JopoSae Assistant Chat] failed to build reply", error);
+    reply =
+      "Mohon maaf, sistem kami sedang mengalami gangguan. Silahkan coba beberapa saat lagi";
+  }
 
-  await sendText(sock, incoming.jid, `Anda mengirim: ${incoming.text}`);
+  await sendText(sock, incoming.jid, reply);
 };
 
 startWhatsApp({
