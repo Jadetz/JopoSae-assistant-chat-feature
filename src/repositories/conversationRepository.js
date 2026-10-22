@@ -12,4 +12,44 @@ const findConversationById = async (id) => {
   return result.rows[0] ?? null;
 };
 
-export { findConversationById };
+const findActiveConversationByContactId = async (contactId) => {
+  const query = `
+  SELECT id, contact_id, status, current_state
+  FROM conversations
+  WHERE contact_id = $1 AND status = 'active'
+  ORDER BY id DESC
+  LIMIT 1;`;
+
+  const values = [contactId];
+  const result = await pool.query(query, values);
+  return result.rows[0] ?? null;
+};
+
+const createConversation = async (contactId) => {
+  const query = `
+  INSERT INTO conversations (contact_id)
+  VALUES ($1)
+  RETURNING id, contact_id, status, current_state;
+  `;
+  const values = [contactId];
+  const result = await pool.query(query, values);
+  return result.rows[0];
+};
+
+const updateConversationState = async (id, currentState) => {
+  const query = `
+  UPDATE conversations
+  SET current_state = $2
+  WHERE id = $1
+  RETURNING id, contact_id, status, current_state; 
+  `;
+  const values = [id, currentState];
+  const result = await pool.query(query, values);
+  return result.rows[0] ?? null;
+};
+export {
+  findConversationById,
+  findActiveConversationByContactId,
+  createConversation,
+  updateConversationState,
+};
