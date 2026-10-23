@@ -5,7 +5,28 @@ import {
   findConsultations,
   findConsultationById,
   updateConsultationStatus,
+  findOpenConsultation,
 } from "../repositories/consultationRepository.js";
+
+// create consultation to admin
+const buildAdminLink = (text) => {
+  const adminNumber = process.env.ADMIN_WHATSAPP_NUMBER;
+  if (!adminNumber) {
+    throw new Error("ADMIN_WHATSAPP_NUMBER is not set");
+  }
+  return `https://wa.me/${adminNumber}?text=${encodeURIComponent(text)}`;
+};
+
+const requestConsultationLink = async (conversationId, service) => {
+  const link = buildAdminLink(
+    `Halo, saya ingin konsultasi layanan ${service.name}.`,
+  );
+  const open = await findOpenConsultation(conversationId, service.id);
+  const consultation =
+    open ?? (await createConsultation(conversationId, service.id));
+  await updateConsultationStatus(consultation.id, "link_generated");
+  return link;
+};
 const requestConsultation = async (conversationId, serviceKey) => {
   const conversation = await findConversationById(conversationId);
   if (!conversation) {
@@ -119,4 +140,6 @@ export {
   getConsultations,
   getConsultationById,
   requestUpdateConsultationStatus,
+  buildAdminLink,
+  requestConsultationLink,
 };

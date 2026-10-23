@@ -10,4 +10,18 @@ const getFaqs = async () => {
   return result.rows;
 };
 
-export { getFaqs };
+const findActiveFaqsByServiceId = async (serviceId) => {
+  const query = `
+  SELECT
+  id, 
+  question, 
+  answer
+  FROM faqs
+  WHERE service_id = $1 AND is_active = TRUE
+  ORDER BY id ASC;
+  `;
+  const values = [serviceId];
+  const result = await pool.query(query, values);
+  return result.rows;
+};
+export { getFaqs, findActiveFaqsByServiceId };

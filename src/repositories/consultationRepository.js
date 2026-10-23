@@ -75,10 +75,25 @@ const updateConsultationStatus = async (id, status) => {
   const result = await pool.query(query, values);
   return result.rows[0] ?? null;
 };
-
+const findOpenConsultation = async (conversationId, serviceId) => {
+  const query = `
+  SELECT
+  id,
+  status
+  FROM consultation_requests
+  WHERE conversation_id = $1 AND service_id = $2
+  AND status IN ('pending','link_generated')
+  ORDER BY id DESC
+  LIMIT 1;
+  `;
+  const values = [conversationId, serviceId];
+  const result = await pool.query(query, values);
+  return result.rows[0] ?? null;
+};
 export {
   createConsultation,
   findConsultations,
   findConsultationById,
   updateConsultationStatus,
+  findOpenConsultation,
 };

@@ -1,10 +1,12 @@
 import pool from "../db.js";
+
 const findAllActive = async () => {
   const result = await pool.query(`
     SELECT
     id,
     service_key,
     name,
+    summary,
     description 
     FROM services
     WHERE is_active = TRUE
@@ -26,5 +28,20 @@ const findActiveByKey = async (serviceKey) => {
   const result = await pool.query(query, values);
   return result.rows[0] ?? null;
 };
+const findActiveById = async (id) => {
+  const query = `
+  SELECT 
+  id,
+  service_key,
+  name,
+  summary,
+  description
+  FROM services
+  WHERE id = $1 AND is_active = TRUE;
+  `;
+  const values = [id];
+  const result = await pool.query(query, values);
+  return result.rows[0] ?? null;
+};
 
-export { findAllActive, findActiveByKey };
+export { findAllActive, findActiveByKey, findActiveById };

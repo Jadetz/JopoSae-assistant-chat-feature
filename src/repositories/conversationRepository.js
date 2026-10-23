@@ -14,7 +14,7 @@ const findConversationById = async (id) => {
 
 const findActiveConversationByContactId = async (contactId) => {
   const query = `
-  SELECT id, contact_id, status, current_state
+  SELECT id, contact_id, status, current_state, selected_service_id
   FROM conversations
   WHERE contact_id = $1 AND status = 'active'
   ORDER BY id DESC
@@ -29,21 +29,21 @@ const createConversation = async (contactId) => {
   const query = `
   INSERT INTO conversations (contact_id)
   VALUES ($1)
-  RETURNING id, contact_id, status, current_state;
+  RETURNING id, contact_id, status, current_state, selected_service_id;
   `;
   const values = [contactId];
   const result = await pool.query(query, values);
   return result.rows[0];
 };
 
-const updateConversationState = async (id, currentState) => {
+const updateConversationState = async (id, currentState, selectedServiceId) => {
   const query = `
   UPDATE conversations
-  SET current_state = $2
+  SET current_state = $2, selected_service_id  = $3
   WHERE id = $1
-  RETURNING id, contact_id, status, current_state; 
+  RETURNING id, contact_id, status, current_state, selected_service_id; 
   `;
-  const values = [id, currentState];
+  const values = [id, currentState, selectedServiceId];
   const result = await pool.query(query, values);
   return result.rows[0] ?? null;
 };
