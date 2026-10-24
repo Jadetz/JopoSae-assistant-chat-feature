@@ -24,8 +24,27 @@ const handleIncomingMessage = async (incoming, sock) => {
   await sendText(sock, incoming.jid, reply);
 };
 
+// Messages from one customer run one at a time, so two quick messages
+// cannot both create a conversation or read the same state
+const queues = new Map();
+const handleInOrder = (incoming, sock) => {
+  const key = incoming.phoneNumber ?? incoming.jid;
+  const previous = queues.get(key) ?? Promise.resolve();
+  const current = previous.then(() => handleIncomingMessage(incoming, sock));
+  // A failed message must not block the next one
+  const tail = current
+    .catch(() => {})
+    .then(() => {
+      if (queues.get(key) === tail) {
+        queues.delete(key);
+      }
+    });
+  queues.set(key, tail);
+  return current;
+};
+
 startWhatsApp({
-  onMessage: handleIncomingMessage,
+  onMessage: handleInOrder,
   pairingNumber: process.env.WA_BOT_NUMBER,
 }).catch((error) => {
   console.error("[bot] failed to start:", error);
