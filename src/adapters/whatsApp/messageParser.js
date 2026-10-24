@@ -7,6 +7,16 @@ import {
   normalizeMessageContent,
 } from "@whiskeysockets/baileys";
 
+// Reactions, edits, deletions and poll votes are not new messages from the customer
+const IGNORED_CONTENT_TYPES = [
+  "reactionMessage",
+  "encReactionMessage",
+  "protocolMessage",
+  "pollUpdateMessage",
+  "keepInChatMessage",
+  "pinInChatMessage",
+];
+
 const parseIncomingMessage = (waMessage) => {
   const { key, message, pushName } = waMessage;
   // debugg message and fromMe
@@ -25,6 +35,9 @@ const parseIncomingMessage = (waMessage) => {
   // normalize and ge content
   const content = normalizeMessageContent(message); // normalisasi isi konten dengan helper baileys
   const contentType = getContentType(content); // return nama konten dari properti utama
+  if (!contentType || IGNORED_CONTENT_TYPES.includes(contentType)) {
+    return null;
+  }
   const text =
     content?.conversation ?? content?.extendedTextMessage?.text ?? null;
   const phoneId = isLidUser(jid) ? key.remoteJidAlt : jid;
