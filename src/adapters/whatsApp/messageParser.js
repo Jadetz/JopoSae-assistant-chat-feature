@@ -5,8 +5,20 @@ import {
   isLidUser,
   jidNormalizedUser,
   normalizeMessageContent,
+  toNumber,
+  isJidNewsletter,
 } from "@whiskeysockets/baileys";
 
+const sentAtOf = (waMessage) => {
+  const seconds = toNumber(waMessage.messageTimestamp);
+  if (!seconds) {
+    console.warn(
+      `[parser] message ${waMessage.key.id} has no timestamp, using current time`,
+    );
+    return new Date();
+  }
+  return new Date(seconds * 1000);
+};
 // Reactions, edits, deletions and poll votes are not new messages from the customer
 const IGNORED_CONTENT_TYPES = [
   "reactionMessage",
@@ -29,7 +41,12 @@ const parseIncomingMessage = (waMessage) => {
 
   const jid = key.remoteJid;
   // if jid is none or from group or status validate
-  if (!jid || isJidGroup(jid) || isJidStatusBroadcast(jid)) {
+  if (
+    !jid ||
+    isJidGroup(jid) ||
+    isJidStatusBroadcast(jid) ||
+    isJidNewsletter(jid)
+  ) {
     return null;
   }
   // normalize and ge content
@@ -57,6 +74,7 @@ const parseIncomingMessage = (waMessage) => {
     text,
     messageType,
     providerMessageId: key.id,
+    sentAt: sentAtOf(waMessage),
   };
 };
 
