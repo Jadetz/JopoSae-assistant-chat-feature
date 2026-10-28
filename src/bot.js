@@ -2,6 +2,10 @@ import "dotenv/config";
 import { startWhatsApp } from "./adapters/whatsApp/whatsAppClient.js";
 import { sendText } from "./adapters/whatsApp/messageSender.js";
 import { buildReply } from "./services/botService.js";
+// Reads and checks the session settings from .env on import, so dotenv must be imported first.
+// A wrong value stops the bot right here with a clear message.
+import { sessionConfig } from "./config/sessionConfig.js";
+
 const handleIncomingMessage = async (incoming, sock) => {
   console.log("[JopoSae Assistant Chat] incoming", incoming);
   if (incoming.messageType !== "text") {
@@ -46,6 +50,8 @@ const handleInOrder = (incoming, sock) => {
 startWhatsApp({
   onMessage: handleInOrder,
   pairingNumber: process.env.WA_BOT_NUMBER,
+  // Offline messages older than this are skipped instead of answered (see whatsAppClient.js)
+  offlineMaxAgeMinutes: sessionConfig.offlineMessageMaxAgeMinutes,
 }).catch((error) => {
   console.error("[bot] failed to start:", error);
   process.exit(1);
