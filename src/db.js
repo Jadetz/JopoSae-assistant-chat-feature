@@ -13,5 +13,22 @@ const pool = new Pool({
 pool.on("error", (error) => {
   console.error("Unexpected PostgreSQL pool error:", error);
 });
+// Run work(client) on one connection between BEGIN and COMMIT.
+// If work throws, everything it wrote is rolled back and the error goes to the caller.
+const withTransaction = async (work) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await work(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
 
 export default pool;
+export { withTransaction };
