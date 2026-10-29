@@ -4,6 +4,8 @@ import { sendText } from "./adapters/whatsApp/messageSender.js";
 import { buildReply } from "./services/botService.js";
 import { findOrStartConversation } from "./services/conversationService.js";
 import { sessionConfig } from "./config/sessionConfig.js";
+import * as sweeper from "./services/sweeper.js";
+import { trackConnection } from "./services/heartbeat.js";
 
 const handleIncomingMessage = async (incoming, sock) => {
   console.log("[JopoSae Assistant Chat] incoming", incoming);
@@ -44,8 +46,20 @@ const handleInOrder = (incoming, sock) => {
   return current;
 };
 
+// The sweeper only runs while connected: offline, every customer would look quiet
+const handleConnectionChange = async (connection) => {
+  await trackConnection(connection);
+  if (connection === "open") {
+    sweeper.start();
+  }
+  if (connection === "close") {
+    sweeper.stop();
+  }
+};
+
 startWhatsApp({
   onMessage: handleInOrder,
+  onConnectionChange: handleConnectionChange,
   pairingNumber: process.env.WA_BOT_NUMBER,
   // Offline messages older than this are skipped instead of answered (see whatsAppClient.js)
   offlineMaxAgeMinutes: sessionConfig.offlineMessageMaxAgeMinutes,

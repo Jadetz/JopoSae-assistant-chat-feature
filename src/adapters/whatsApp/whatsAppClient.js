@@ -16,8 +16,10 @@ const isTooOld = (sentAt, maxAgeMinutes) =>
 // Connect to WhatsApp and pass every valid incoming message to onMessage(incoming, sock)
 // pairingNumber: bot number, digits only with country code, e.g. "6281234567890"
 // offlineMaxAgeMinutes: messages sent while the bot was offline and older than this are skipped
+// onConnectionChange(connection): called with "connecting", "open" or "close"
 const startWhatsApp = async ({
   onMessage,
+  onConnectionChange,
   pairingNumber,
   offlineMaxAgeMinutes,
 }) => {
@@ -60,6 +62,15 @@ const startWhatsApp = async ({
         }
       }
 
+      // The bot decides what a connection change means (sweeper, heartbeat); a qr-only update has no connection
+      if (connection && onConnectionChange) {
+        try {
+          await onConnectionChange(connection);
+        } catch (error) {
+          console.error("[whatsapp] connection handler failed:", error);
+        }
+      }
+
       if (connection === "open") {
         console.log("[whatsapp] connected");
       }
@@ -80,11 +91,14 @@ const startWhatsApp = async ({
         );
         // A reconnect starts from scratch: every option must be passed again,
         // otherwise the new socket loses it (e.g. no age limit for offline messages)
-        startWhatsApp({ onMessage, pairingNumber, offlineMaxAgeMinutes }).catch(
-          (error) => {
-            console.error("[whatsapp] reconnect failed:", error);
-          },
-        );
+        startWhatsApp({
+          onMessage,
+          onConnectionChange,
+          pairingNumber,
+          offlineMaxAgeMinutes,
+        }).catch((error) => {
+          console.error("[whatsapp] reconnect failed:", error);
+        });
       }
     },
   );
