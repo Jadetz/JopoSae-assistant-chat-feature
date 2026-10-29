@@ -111,7 +111,7 @@ const createResumedConversation = async (
 ) => {
   const query = `
   INSERT INTO conversations (contact_id, started_at, last_activity_at, current_state, selected_service_id, resumed_from_id)
-  VALUES ($1, $2, $3, $4, $5, $6)
+  VALUES ($1, $2, $2, $3, $4, $5)
   RETURNING id, contact_id, status, current_state, selected_service_id;
   `;
   const values = [
