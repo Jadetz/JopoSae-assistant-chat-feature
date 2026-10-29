@@ -1,5 +1,5 @@
 import pool from "../db.js";
-const createConsultation = async (conversationId, serviceId) => {
+const createConsultation = async (conversationId, serviceId, db = pool) => {
   const query = ` INSERT INTO consultation_requests (
       conversation_id,
       service_id
@@ -9,7 +9,7 @@ const createConsultation = async (conversationId, serviceId) => {
   `;
 
   const values = [conversationId, serviceId];
-  const result = await pool.query(query, values);
+  const result = await db.query(query, values);
   return result.rows[0];
 };
 
@@ -64,7 +64,7 @@ WHERE cr.id =$1;`;
 };
 
 //update secara patch
-const updateConsultationStatus = async (id, status) => {
+const updateConsultationStatus = async (id, status, db = pool) => {
   const query = `
   UPDATE consultation_requests
   SET status = $1
@@ -72,10 +72,10 @@ const updateConsultationStatus = async (id, status) => {
   RETURNING *;
   `;
   const values = [status, id];
-  const result = await pool.query(query, values);
+  const result = await db.query(query, values);
   return result.rows[0] ?? null;
 };
-const findOpenConsultation = async (conversationId, serviceId) => {
+const findOpenConsultation = async (conversationId, serviceId, db = pool) => {
   const query = `
   SELECT
   id,
@@ -87,7 +87,7 @@ const findOpenConsultation = async (conversationId, serviceId) => {
   LIMIT 1;
   `;
   const values = [conversationId, serviceId];
-  const result = await pool.query(query, values);
+  const result = await db.query(query, values);
   return result.rows[0] ?? null;
 };
 export {
