@@ -2,27 +2,24 @@ import "dotenv/config";
 import { startWhatsApp } from "./adapters/whatsApp/whatsAppClient.js";
 import { sendText } from "./adapters/whatsApp/messageSender.js";
 import { buildReply } from "./services/botService.js";
-// Reads and checks the session settings from .env on import, so dotenv must be imported first.
-// A wrong value stops the bot right here with a clear message.
+import { findOrStartConversation } from "./services/conversationService.js";
 import { sessionConfig } from "./config/sessionConfig.js";
 
 const handleIncomingMessage = async (incoming, sock) => {
   console.log("[JopoSae Assistant Chat] incoming", incoming);
-  if (incoming.messageType !== "text") {
-    await sendText(
-      sock,
-      incoming.jid,
-      "Mohon maaf, saat ini kami hanya dapat membaca pesan teks",
-    );
-    return;
-  }
   let reply;
   try {
-    reply = await buildReply(incoming);
+    // Every customer message counts as activity, text or not, so the session is decided first
+    const session = await findOrStartConversation(incoming);
+    if (incoming.messageType !== "text") {
+      reply = "_Mohon maaf, saat ini kami hanya dapat membaca pesan teks_";
+    } else {
+      reply = await buildReply(incoming, session);
+    }
   } catch (error) {
     console.error("[JopoSae Assistant Chat] failed to build reply", error);
     reply =
-      "Mohon maaf, sistem kami sedang mengalami gangguan. Silahkan coba beberapa saat lagi";
+      "_Mohon maaf, sistem kami sedang mengalami gangguan. Silahkan coba beberapa saat lagi_";
   }
 
   await sendText(sock, incoming.jid, reply);

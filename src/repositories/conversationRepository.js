@@ -24,15 +24,56 @@ const findActiveConversationByContactId = async (contactId) => {
   const result = await pool.query(query, values);
   return result.rows[0] ?? null;
 };
-
-const createConversation = async (contactId) => {
+const claimActiveConversation = async (
+  contactId,
+  sentAt,
+  idleTimeoutMinutes,
+  db = pool,
+) => {
   const query = `
-  INSERT INTO conversations (contact_id)
-  VALUES ($1)
+  UPDATE conversations
+  SET last_activity_at = GREATEST(last_activity_at, $2)
+  WHERE contact_id = $1
+  AND status = 'active'
+  AND $2 < last_activity_at + make_interval(mins => $3)
   RETURNING id, contact_id, status, current_state, selected_service_id;
   `;
-  const values = [contactId];
-  const result = await pool.query(query, values);
+  const values = [contactId, sentAt, idleTimeoutMinutes];
+  const result = await db.query(query, values);
+  return result.rows[0] ?? null;
+};
+const closeStaleConversation = async (
+  contactId,
+  sentAt,
+  idleTimeoutMinutes,
+  db = pool,
+) => {
+  const query = `
+  UPDATE conversations
+  SET status = (CASE WHEN handed_off_at IS NULL
+  THEN 'closed' ELSE 'handed_off' END)::conversation_status,
+  ended_at = last_activity_at,
+  closed_at = now(),
+  closed_by = 'bot',
+  idle_timeout_minutes = $3
+  WHERE contact_id = $1
+  AND status = 'active'
+  AND $2 >= last_activity_at + make_interval(mins => $3)
+  RETURNING id;
+  `;
+
+  const values = [contactId, sentAt, idleTimeoutMinutes];
+  const result = await db.query(query, values);
+  return result.rows[0] ?? null;
+};
+const createConversation = async (contactId, sentAt, db = pool) => {
+  const query = `
+  INSERT INTO conversations (contact_id, started_at, last_activity_at)
+  VALUES ($1, $2, $2)
+  RETURNING id, contact_id, status, current_state, selected_service_id;
+  `;
+  const values = [contactId, sentAt];
+  const result = await db.query(query, values);
   return result.rows[0];
 };
 
@@ -52,4 +93,6 @@ export {
   findActiveConversationByContactId,
   createConversation,
   updateConversationState,
+  claimActiveConversation,
+  closeStaleConversation,
 };

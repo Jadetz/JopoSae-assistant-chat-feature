@@ -4,7 +4,6 @@ import {
 } from "../repositories/serviceRepository.js";
 import { updateConversationState } from "../repositories/conversationRepository.js";
 import { findActiveFaqsByServiceId } from "../repositories/faqsRepository.js";
-import { findOrStartConversation } from "./conversationService.js";
 import { requestConsultationLink } from "./consultationService.js";
 
 // Each show* function saves where the customer is now, then returns the text to send
@@ -12,33 +11,50 @@ import { requestConsultationLink } from "./consultationService.js";
 const showMainMenu = async (conversation) => {
   const services = await findAllActive();
   if (services.length === 0) {
-    return "Mohon maaf, saat ini belum ada layanan yang tersedia";
+    return `_Mohon maaf, saat ini belum ada layanan yang tersedia_`;
   }
   await updateConversationState(conversation.id, "main_menu", null);
-  const lines = services.map(
-    (service, index) => `${index + 1}. ${service.name}`,
-  );
+  const lines = services.map((service, index) => {
+    const summary = service.summary
+      ? `_${service.summary}_`
+      : "_Ringkasan layanan belum tersedia_";
+    return `${index + 1}. *${service.name}*
+    ${summary} \n`;
+  });
   return [
-    "Halo! Selamat datang di JopoSae Digital Platform.",
+    "👋🏻Halo! Selamat datang di *JopoSae Labs Digital Platform*.",
     "",
-    "Kami menyediakan beberapa layanan untuk mitra dan pelanggan. Silakan pilih layanan yang ingin Anda ketahui:",
+    "*JopoSae Labs Digital Platform* adalah platform digital yang menyediakan solusi untuk kebutuhan pengelolaan layanan dan transaksi.",
+    "",
+    "_Kami menyediakan beberapa layanan untuk mitra dan pelanggan. Silakan pilih layanan yang ingin Anda ketahui:_",
     "",
     ...lines,
+    `*Ketik angka 1–${services.length} untuk memilih layanan.*`,
+    "_Ketik layanan untuk kembali ke menu utama._",
   ].join("\n");
 };
 
 const showServiceMenu = async (conversation, service) => {
   await updateConversationState(conversation.id, "service_menu", service.id);
+  let summary;
+  if (service.summary) {
+    summary = `_${service.summary}_`;
+  } else {
+    summary = "Ringkasan layanan belum tersedia";
+  }
   return [
     `*${service.name}*`,
     "",
-    service.summary ?? "Ringkasan layanan belum tersedia",
+    summary,
     "",
     "Apa yang ingin Anda lakukan?",
     "",
     "1. Lihat informasi layanan",
     "2. Konsultasi dengan admin",
     "3. Kembali ke menu utama",
+    "",
+    "*Ketik angka 1-3 untuk memilih layanan.*",
+    "_Ketik layanan untuk kembali ke menu utama._",
   ].join("\n");
 };
 
@@ -47,7 +63,7 @@ const showServiceInfo = async (conversation, service) => {
   return [
     `*Informasi ${service.name}*`,
     "",
-    service.description ?? "Informasi layanan belum tersedia",
+    service.description ?? "Mohon maaf, Informasi layanan belum tersedia",
     "",
     "Untuk mengetahui fitur, mekanisme penggunaan, atau kesesuaian layanan dengan kebutuhan Anda, silakan pilih:",
     "",
@@ -55,6 +71,9 @@ const showServiceInfo = async (conversation, service) => {
     "2. Konsultasi dengan admin",
     `3. Kembali ke kategori ${service.name}`,
     "4. Menu utama",
+    "",
+    "*Ketik angka 1-4 untuk memilih layanan.*",
+    "_Ketik layanan untuk kembali ke menu utama._",
   ].join("\n");
 };
 
@@ -67,7 +86,8 @@ const showFaqList = async (conversation, service, faqs) => {
     ...lines,
     "0. Kembali ke informasi layanan",
     "",
-    "Silakan balas dengan nomor pertanyaan",
+    "*Silakan balas dengan nomor pertanyaan*",
+    "_Ketik layanan untuk kembali ke menu utama._",
   ].join("\n");
 };
 
@@ -82,17 +102,18 @@ const showConsultation = async (conversation, service) => {
     "",
     "Pesan konsultasi sudah disiapkan. Setelah WhatsApp terbuka, silakan tekan *Kirim* untuk memulai percakapan dengan admin kami.",
     "",
-    "Ketik *Layanan* untuk kembali ke menu utama",
+    "_Ketik layanan untuk kembali ke menu utama._",
   ].join("\n");
 };
 
 // Wrong choice: say so, then show the same screen again
 const invalidChoice = (screen) =>
-  `Mohon maaf, pilihan tidak tersedia.\n\n${screen}`;
+  `_Mohon maaf, pilihan tidak tersedia.\n\n${screen}_`;
 
-const buildReply = async (incoming) => {
+// session = { conversation, origin } from conversationService, decided in bot.js
+const buildReply = async (incoming, session) => {
   const text = (incoming.text ?? "").trim().toLowerCase();
-  const conversation = await findOrStartConversation(incoming);
+  const { conversation } = session;
 
   if (text === "layanan") {
     return showMainMenu(conversation);
