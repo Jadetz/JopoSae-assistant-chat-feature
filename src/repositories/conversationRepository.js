@@ -125,6 +125,24 @@ const createResumedConversation = async (
   return result.rows[0];
 };
 
+// Sweeper: close every active conversation whose customer has been quiet for the idle timeout
+const closeIdleConversations = async (idleTimeoutMinutes, db = pool) => {
+  const query = `
+  UPDATE conversations
+  SET status = (CASE WHEN handed_off_at IS NULL THEN 'closed' ELSE 'handed_off' END)::conversation_status,
+    ended_at = last_activity_at,
+    closed_at = now(),
+    closed_by = 'sweeper',
+    idle_timeout_minutes = $1
+  WHERE status = 'active'
+    AND last_activity_at <= now() - make_interval(mins => $1)
+  RETURNING id;
+  `;
+  const values = [idleTimeoutMinutes];
+  const result = await db.query(query, values);
+  return result.rows;
+};
+
 const markHandedOff = async (id, db = pool) => {
   const query = `
   UPDATE conversations
@@ -146,4 +164,5 @@ export {
   markHandedOff,
   findLastClosedConversation,
   createResumedConversation,
+  closeIdleConversations,
 };
