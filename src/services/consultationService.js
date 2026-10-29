@@ -1,5 +1,9 @@
+import { withTransaction } from "../db.js";
 import { findActiveByKey } from "../repositories/serviceRepository.js";
-import { findConversationById } from "../repositories/conversationRepository.js";
+import {
+  findConversationById,
+  markHandedOff,
+} from "../repositories/conversationRepository.js";
 import {
   createConsultation,
   findConsultations,
@@ -21,10 +25,14 @@ const requestConsultationLink = async (conversationId, service) => {
   const link = buildAdminLink(
     `Halo, saya ingin konsultasi layanan ${service.name}.`,
   );
-  const open = await findOpenConsultation(conversationId, service.id);
-  const consultation =
-    open ?? (await createConsultation(conversationId, service.id));
-  await updateConsultationStatus(consultation.id, "link_generated");
+  // the link status and handed_off_at are saved together, or not all
+  await withTransaction(async (client) => {
+    const open = await findOpenConsultation(conversationId, service.id, client);
+    const consultation =
+      open ?? (await createConsultation(conversationId, service.id, client));
+    await updateConsultationStatus(consultation.id, "link_generated", client);
+    await markHandedOff(conversationId, client);
+  });
   return link;
 };
 const requestConsultation = async (conversationId, serviceKey) => {
