@@ -106,17 +106,36 @@ const showConsultation = async (conversation, service) => {
   ].join("\n");
 };
 
-// Wrong choice: say so, then show the same screen again
-const invalidChoice = (screen) =>
-  `_Mohon maaf, pilihan tidak tersedia.\n\n${screen}_`;
+// The previous session is over: say so, then start again from the main menu
+const showSessionEnded = async (conversation) =>
+  [
+    "Sesi obrolan sebelumnya sudah berakhir. Silakan pilih layanan:",
+    "",
+    await showMainMenu(conversation),
+  ].join("\n");
+
+// Wrong choice: say so, then show the same screen again.
+// A resumed conversation goes back to the main menu instead, the customer may not remember the old screen.
+// showSameScreen is a function, so the old screen is not saved again when it is not shown.
+const invalidChoice = async (session, showSameScreen) => {
+  if (session.origin === "resumed") {
+    return showSessionEnded(session.conversation);
+  }
+  return `_Mohon maaf, pilihan tidak tersedia._\n\n${await showSameScreen()}`;
+};
 
 // session = { conversation, origin } from conversationService, decided in bot.js
 const buildReply = async (incoming, session) => {
   const text = (incoming.text ?? "").trim().toLowerCase();
-  const { conversation } = session;
+  const { conversation, origin } = session;
 
   if (text === "layanan") {
     return showMainMenu(conversation);
+  }
+
+  // Back after a long time: the old screen is too old to answer from
+  if (origin === "returning") {
+    return showSessionEnded(conversation);
   }
 
   // Any text that is not a service number shows the menu, including the first message
@@ -124,7 +143,9 @@ const buildReply = async (incoming, session) => {
     const services = await findAllActive();
     const service = services[Number(text) - 1];
     if (!service) {
-      return showMainMenu(conversation);
+      return origin === "resumed"
+        ? showSessionEnded(conversation)
+        : showMainMenu(conversation);
     }
     return showServiceMenu(conversation, service);
   }
@@ -145,7 +166,7 @@ const buildReply = async (incoming, session) => {
     if (text === "3") {
       return showMainMenu(conversation);
     }
-    return invalidChoice(await showServiceMenu(conversation, service));
+    return invalidChoice(session, () => showServiceMenu(conversation, service));
   }
 
   if (conversation.current_state === "service_info") {
@@ -169,7 +190,7 @@ const buildReply = async (incoming, session) => {
     if (text === "4") {
       return showMainMenu(conversation);
     }
-    return invalidChoice(await showServiceInfo(conversation, service));
+    return invalidChoice(session, () => showServiceInfo(conversation, service));
   }
 
   if (conversation.current_state === "faq_list") {
@@ -179,7 +200,9 @@ const buildReply = async (incoming, session) => {
     const faqs = await findActiveFaqsByServiceId(service.id);
     const faq = faqs[Number(text) - 1];
     if (!faq) {
-      return invalidChoice(await showFaqList(conversation, service, faqs));
+      return invalidChoice(session, () =>
+        showFaqList(conversation, service, faqs),
+      );
     }
     return [
       `*${faq.question}*`,
