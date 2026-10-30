@@ -15,9 +15,11 @@ const contactNumberOf = (incoming) => {
   return incoming.phoneNumber ?? incoming.jid.split("@")[0];
 };
 
+// No ended_at means we cannot tell when it ended, so it counts as outside the window
 const isWithinResumeWindow = (endedAt, sentAt) =>
+  endedAt !== null &&
   sentAt.getTime() - endedAt.getTime() <
-  sessionConfig.resumeWindowMinutes * 60 * 1000;
+    sessionConfig.resumeWindowMinutes * 60 * 1000;
 
 // Close the stale conversation and open a new one together, or not at all.
 // A customer who comes back soon continues on the same screen.
