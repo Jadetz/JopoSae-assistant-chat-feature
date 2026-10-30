@@ -109,7 +109,7 @@ const showConsultation = async (conversation, service) => {
 // The previous session is over: say so, then start again from the main menu
 const showSessionEnded = async (conversation) =>
   [
-    "Sesi obrolan sebelumnya sudah berakhir. Silakan pilih layanan:",
+    "_Sesi obrolan sebelumnya sudah berakhir. Silakan pilih layanan_",
     "",
     await showMainMenu(conversation),
   ].join("\n");
