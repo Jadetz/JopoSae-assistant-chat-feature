@@ -4,9 +4,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
-    "bot": "node src/bot.js",
+    "dev": "cross-env LOG_SOURCE=api node --watch src/server.js | pino-pretty",
+    "start": "cross-env LOG_SOURCE=api node src/server.js",
+    "bot": "cross-env LOG_SOURCE=bot node src/bot.js",
+    "bot:dev": "cross-env LOG_SOURCE=bot node src/bot.js | pino-pretty",
     "lint": "eslint ."
   },
   "keywords": [],
@@ -16,9 +17,11 @@
   "dependencies": {
     "@whiskeysockets/baileys": "^7.0.0-rc14",
     "cors": "^2.8.6",
+    "cross-env": "^10.1.0",
     "dotenv": "^18.0.7",
     "express": "^5.3.0",
     "pg": "^8.23.1",
+    "pino": "^10.4.0",
     "qrcode-terminal": "^0.12.0"
   },
   "type": "module",
@@ -26,6 +29,7 @@
     "@eslint/js": "^10.0.1",
     "eslint": "^10.13.0",
     "eslint-plugin-promise": "^7.3.0",
-    "globals": "^17.13.0"
+    "globals": "^17.13.0",
+    "pino-pretty": "^13.2.0"
   }
 }
