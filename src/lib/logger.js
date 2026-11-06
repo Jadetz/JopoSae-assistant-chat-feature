@@ -20,7 +20,7 @@ const SENSITIVE_KEYS = [
 
 const REDACT_PATHS = [
   ...SENSITIVE_KEYS,
-  ...SENSITIVE_KEYS.map((key) => `*${key}`),
+  ...SENSITIVE_KEYS.map((key) => `*.${key}`),
   "err.detail",
 ];
 
@@ -30,7 +30,7 @@ const REDACT_PATHS = [
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",
   base: {
-    source: process.env.LOG_SOURCE || "unknwon",
+    source: process.env.LOG_SOURCE || "unknown",
     pid: process.pid,
   },
   timestamp: pino.stdTimeFunctions.isoTime,

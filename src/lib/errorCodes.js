@@ -8,13 +8,16 @@ const ERROR_CODES = Object.freeze({
   API_ROUTE_NOT_FOUND: "api.route_not_found",
   API_500: "api.500",
   // WhatsApp connection
-  WA_DISCONNECTED: "wa.disconneted",
+  WA_DISCONNECTED: "wa.disconnected",
   WA_SEND_FAILED: "wa.send_failed",
   WA_PAIRING_FAILED: "wa.pairing_failed",
   WA_RECONNECT_FAILED: "wa.reconnect_failed",
   // Bot process
   BOT_REPLY_FAILED: "bot.reply_failed",
   BOT_START_FAILED: "bot.start_failed",
+  // Backgroud jobs
+  SWEEPER_FAILED: "sweeper.failed",
+  HEARTBEAT_FAILED: "heartbeat.failed",
   // Database
   DB_POOL_ERROR: "db.pool_failed",
 });
