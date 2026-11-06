@@ -19,7 +19,7 @@ const ERROR_CODES = Object.freeze({
   SWEEPER_FAILED: "sweeper.failed",
   HEARTBEAT_FAILED: "heartbeat.failed",
   // Database
-  DB_POOL_ERROR: "db.pool_failed",
+  DB_POOL_ERROR: "db.pool_error",
 });
 
 export default ERROR_CODES;
