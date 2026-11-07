@@ -37,6 +37,7 @@ const errorHandler = (err, req, res, next) => {
     log.warn(
       {
         code: ERROR_CODES.API_BAD_REQUEST,
+        status: err.status,
         endpoint,
       },
       "Rejected request",

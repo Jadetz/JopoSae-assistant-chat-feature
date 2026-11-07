@@ -19,14 +19,14 @@ app.use("/api/consultations", consultationRoutes);
 
 app.get("/", (req, res) => {
   sendSuccess(res, {
-    message: "Server ok masseh",
+    message: "Server ok masseh.",
   });
 });
 
 app.get("/api/health/db", async (req, res) => {
   const result = await pool.query("SELECT NOW () AS server_time");
   sendSuccess(res, {
-    message: "Koneksi database berhasil",
+    message: "Koneksi database berhasil.",
     data: result.rows[0],
   });
 });
