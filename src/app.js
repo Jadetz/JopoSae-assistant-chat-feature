@@ -4,6 +4,9 @@ import pool from "./db.js";
 import faqRoutes from "./routes/faqRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
 import consultationRoutes from "./routes/consultationRoutes.js";
+import { sendSuccess } from "./lib/respond.js";
+import notFoundHandler from "./middlewares/notFoundHandler.js";
+import errorHandler from "./middlewares/errorHandler.js";
 const app = express();
 
 //middleware
@@ -15,57 +18,21 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/consultations", consultationRoutes);
 
 app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Server Ok Masseh",
+  sendSuccess(res, {
+    message: "Server ok masseh",
   });
 });
 
 app.get("/api/health/db", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT NOW () AS server_time");
-
-    res.status(200).json({
-      success: true,
-      message: "Koneksi database berhasil.",
-      data: result.rows[0],
-    });
-  } catch (error) {
-    console.error("Database connection error", error.message);
-
-    res.status(500).json({
-      success: false,
-      message: "Mohon maaf, koneksi database gagal.",
-    });
-  }
+  const result = await pool.query("SELECT NOW () AS server_time");
+  sendSuccess(res, {
+    message: "Koneksi database berhasil",
+    data: result.rows[0],
+  });
 });
-// // services
-// app.get("/api/services", async (req, res) => {
-//   try {
-//     const result = await pool.query(`
-//       SELECT
-//       id,
-//       service_key,
-//       name,
-//       description
-//       FROM services
-//       WHERE is_active = TRUE
-//       ORDER BY sort_order ASC
-//       `);
 
-//     res.status(200).json({
-//       succes: true,
-//       message: "Service retrieved succesfully",
-//       data: result.rows,
-//     });
-//   } catch (error) {
-//     console.error("Failed to retrieve service", error.message);
-
-//     res.status(500).json({
-//       succes: false,
-//       message: "Failed to retrieve services",
-//     });
-//   }
-// });
+// Unknown routes, then every error; both must stay bellow all routes
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;
