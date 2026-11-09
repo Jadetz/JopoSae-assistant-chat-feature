@@ -6,7 +6,7 @@ const notFoundHandler = (req, res) => {
   sendError(res, {
     status: 404,
     code: ERROR_CODES.API_ROUTE_NOT_FOUND,
-    message: "Mohon maaf, alamat yang diminta tidak ditemukan",
+    message: "Mohon maaf, alamat yang diminta tidak ditemukan.",
   });
 };
 
