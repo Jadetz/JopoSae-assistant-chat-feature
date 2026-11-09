@@ -1,8 +1,11 @@
 import { sessionConfig } from "../config/sessionConfig.js";
 import { closeIdleConversations } from "../repositories/conversationRepository.js";
-
+import logger from "../lib/logger.js";
+import ERROR_CODES from "../lib/errorCodes.js";
 const MINUTE = 60 * 1000;
-
+const log = logger.child({
+  component: "sweeper",
+});
 // Only one sweeper per process, however often the connection opens
 let startTimer = null; // jeda awal
 let sweepTimer = null; // sweeper jalan 5 menit sekali
@@ -13,9 +16,20 @@ const sweep = async () => {
     const closed = await closeIdleConversations(
       sessionConfig.idleTimeoutMinutes,
     );
-    console.log(`[sweeper] closed ${closed.length} conversation(s)`);
+    log.info(
+      {
+        closed: closed.length,
+      },
+      "Sweeper finished.",
+    );
   } catch (error) {
-    console.error("[sweeper] sweep failed:", error);
+    log.error(
+      {
+        err: error,
+        code: ERROR_CODES.SWEEPER_FAILED,
+      },
+      "Sweeper failed.",
+    );
   }
 };
 
