@@ -10,7 +10,7 @@ const REF_CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
 const createRefCode = () => {
   let refCode = "E-";
-  for (let i = 0; i < 3; i += 1) {
+  for (let i = 0; i < 4; i += 1) {
     refCode += REF_CODE_ALPHABET[randomInt(REF_CODE_ALPHABET.length)];
   }
   return refCode;
@@ -18,7 +18,7 @@ const createRefCode = () => {
 
 // Express treats a middleware as an error handler only when it takes four parameters.
 const errorHandler = (err, req, res, next) => {
-  const endpoint = `${req.method} ${req.originalURL.split("?")[0]}`;
+  const endpoint = `${req.method} ${req.originalUrl.split("?")[0]}`;
   if (err.type === "entity.parse.failed") {
     log.warn(
       {
@@ -53,7 +53,7 @@ const errorHandler = (err, req, res, next) => {
     {
       err,
       code: ERROR_CODES.API_500,
-      refCode: refCode,
+      ref_code: refCode,
       endpoint,
     },
     "Unhandled error",
@@ -62,7 +62,7 @@ const errorHandler = (err, req, res, next) => {
     status: 500,
     code: ERROR_CODES.API_500,
     message:
-      "Mohon maaf, terjadi kesalahan pada server. Silahkan coba beberapa saat lagi.",
+      "Mohon maaf, terjadi kesalahan pada server. Silakan coba beberapa saat lagi.",
     refCode,
   });
 };
