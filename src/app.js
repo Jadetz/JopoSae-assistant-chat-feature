@@ -9,8 +9,18 @@ import notFoundHandler from "./middlewares/notFoundHandler.js";
 import errorHandler from "./middlewares/errorHandler.js";
 const app = express();
 
-//middleware
-app.use(cors());
+// Comma-separated list ini DASHBOARD_ORIGIN. Empty means no other otigin is allowed
+const allowedOrigins = (process.env.DASHBOARD_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+// middleware
+app.use(
+  cors({
+    origin: allowedOrigins.length > 0 ? allowedOrigins : false,
+    credentials: true,
+  }),
+);
 app.use(express.json());
 // endpoint call
 app.use("/api/faqs", faqRoutes);
