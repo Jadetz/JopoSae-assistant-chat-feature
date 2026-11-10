@@ -32,7 +32,7 @@ const startWhatsApp = async ({
   // requestPairingCode saves creds.me before pairing ends, account only exists after pair-success.
   // With me but no account Baileys tries to log in and WhatsApp rejects it as logged out.
   if (state.creds?.me && !state.creds.account) {
-    log.warn("Previous pairing did not finish, starting a new one.");
+    log.warn("Previous pairing did not finish, starting a new one");
     state.creds.me = undefined;
   }
   // Baileys' bundled WA Web version can be outdated and get rejected at pairing
@@ -74,7 +74,7 @@ const startWhatsApp = async ({
               {
                 pairing_code: code,
               },
-              "Pairing code ready.",
+              "Pairing code ready",
             );
           } catch (error) {
             log.error(
@@ -82,7 +82,7 @@ const startWhatsApp = async ({
                 err: error,
                 code: ERROR_CODES.WA_PAIRING_FAILED,
               },
-              "Pairing code request failed.",
+              "Pairing code request failed",
             );
           }
         }
@@ -98,7 +98,7 @@ const startWhatsApp = async ({
       }
 
       if (connection === "open") {
-        log.info("Connected to WhatsApp.");
+        log.info("Connected to WhatsApp");
       }
 
       if (connection === "close") {

@@ -7,8 +7,8 @@ const log = logger.child({
   component: "sweeper",
 });
 // Only one sweeper per process, however often the connection opens
-let startTimer = null; // jeda awal
-let sweepTimer = null; // sweeper jalan 5 menit sekali
+let startTimer = null; // initial delay
+let sweepTimer = null; // repeats every sweeperIntervalMinutes
 
 // One round: close every conversation whose customer went quiet. Errors are logged, never thrown.
 const sweep = async () => {
@@ -20,7 +20,7 @@ const sweep = async () => {
       {
         closed: closed.length,
       },
-      "Sweeper finished.",
+      "Sweep finished",
     );
   } catch (error) {
     log.error(
@@ -28,7 +28,7 @@ const sweep = async () => {
         err: error,
         code: ERROR_CODES.SWEEPER_FAILED,
       },
-      "Sweeper failed.",
+      "Sweep failed",
     );
   }
 };

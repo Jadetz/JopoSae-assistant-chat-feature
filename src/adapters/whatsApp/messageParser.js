@@ -21,7 +21,7 @@ const sentAtOf = (waMessage) => {
       {
         provider_message_id: waMessage.key.id,
       },
-      "Message has no timestamp, using current time.",
+      "Message has no timestamp, using current time",
     );
     return new Date();
   }

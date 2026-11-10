@@ -21,7 +21,7 @@ const beat = async () => {
         err: error,
         code: ERROR_CODES.HEARTBEAT_FAILED,
       },
-      "Failed to update last_seen_at.",
+      "Failed to update last_seen_at",
     );
   }
 };
@@ -36,7 +36,7 @@ const trackConnection = async (connection) => {
         err: error,
         code: ERROR_CODES.HEARTBEAT_FAILED,
       },
-      "Failed to save connection state.",
+      "Failed to save connection state",
     );
   }
 
