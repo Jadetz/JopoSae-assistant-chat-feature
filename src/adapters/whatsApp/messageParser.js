@@ -8,13 +8,20 @@ import {
   toNumber,
   isJidNewsletter,
 } from "@whiskeysockets/baileys";
+import logger from "../../lib/logger.js";
 
+const log = logger.child({
+  component: "whatsapp",
+});
 // messageTimestamp is in seconds and can be a number or a Long object, toNumber handles both
 const sentAtOf = (waMessage) => {
   const seconds = toNumber(waMessage.messageTimestamp);
   if (!seconds) {
-    console.warn(
-      `[parser] message ${waMessage.key.id} has no timestamp, using current time`,
+    log.warn(
+      {
+        provider_message_id: waMessage.key.id,
+      },
+      "Message has no timestamp, using current time",
     );
     return new Date();
   }

@@ -6,9 +6,19 @@ import { findOrStartConversation } from "./services/conversationService.js";
 import { sessionConfig } from "./config/sessionConfig.js";
 import * as sweeper from "./services/sweeper.js";
 import { trackConnection } from "./services/heartbeat.js";
+import logger from "./lib/logger.js";
+import ERROR_CODES from "./lib/errorCodes.js";
+
+const log = logger.child({ component: "bot" });
 
 const handleIncomingMessage = async (incoming, sock) => {
-  console.log("[JopoSae Assistant Chat] incoming", incoming);
+  log.info(
+    {
+      provider_message_id: incoming.providerMessageId,
+      message_type: incoming.messageType,
+    },
+    "Incoming message",
+  );
   let reply;
   try {
     // Every customer message counts as activity, text or not, so the session is decided first
@@ -19,12 +29,31 @@ const handleIncomingMessage = async (incoming, sock) => {
       reply = await buildReply(incoming, session);
     }
   } catch (error) {
-    console.error("[JopoSae Assistant Chat] failed to build reply", error);
+    log.error(
+      {
+        err: error,
+        code: ERROR_CODES.BOT_REPLY_FAILED,
+        provider_message_id: incoming.providerMessageId,
+      },
+      "Failed to build reply",
+    );
     reply =
       "_Mohon maaf, sistem kami sedang mengalami gangguan. Silahkan coba beberapa saat lagi_";
   }
 
-  await sendText(sock, incoming.jid, reply);
+  // A timeout can mean the message was already delivered, so a failed send is never retried.
+  try {
+    await sendText(sock, incoming.jid, reply);
+  } catch (error) {
+    log.error(
+      {
+        err: error,
+        code: ERROR_CODES.WA_SEND_FAILED,
+        provider_message_id: incoming.providerMessageId,
+      },
+      "Failed to send reply",
+    );
+  }
 };
 
 // Messages from one customer run one at a time, so two quick messages
@@ -64,6 +93,9 @@ startWhatsApp({
   // Offline messages older than this are skipped instead of answered (see whatsAppClient.js)
   offlineMaxAgeMinutes: sessionConfig.offlineMessageMaxAgeMinutes,
 }).catch((error) => {
-  console.error("[bot] failed to start:", error);
+  log.error(
+    { err: error, code: ERROR_CODES.BOT_START_FAILED },
+    "Bot failed to start",
+  );
   process.exit(1);
 });

@@ -1,6 +1,9 @@
 import PG from "pg";
+import logger from "./lib/logger.js";
+import ERROR_CODES from "./lib/errorCodes.js";
 
 const { Pool } = PG;
+const log = logger.child({ component: "db" });
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -11,7 +14,10 @@ const pool = new Pool({
 });
 
 pool.on("error", (error) => {
-  console.error("Unexpected PostgreSQL pool error:", error);
+  log.error(
+    { err: error, code: ERROR_CODES.DB_POOL_ERROR },
+    "Unexpected PostgreSQL pool error",
+  );
 });
 // Run work(client) on one connection between BEGIN and COMMIT.
 // If work throws, everything it wrote is rolled back and the error goes to the caller.

@@ -108,7 +108,6 @@ const getConsultationById = async (id) => {
 };
 
 const requestUpdateConsultationStatus = async (id, status) => {
-  console.log("Service patch status jalan...");
   const numericId = Number(id);
   const isValidId = Number.isInteger(numericId) && numericId > 0;
 

@@ -5,9 +5,13 @@ import makeWASocket, {
 } from "@whiskeysockets/baileys";
 import qrcode from "qrcode-terminal";
 import { parseIncomingMessage } from "./messageParser.js";
+import logger from "../../lib/logger.js";
+import ERROR_CODES from "../../lib/errorCodes.js";
 
 const AUTH_FOLDER = "auth_info";
-
+const log = logger.child({
+  component: "whatsapp",
+});
 // True when the message is older than maxAgeMinutes.
 // Both sides are milliseconds: now minus sentAt (from the parser) vs the limit in minutes * 60 * 1000.
 const isTooOld = (sentAt, maxAgeMinutes) =>
@@ -28,15 +32,26 @@ const startWhatsApp = async ({
   // requestPairingCode saves creds.me before pairing ends, account only exists after pair-success.
   // With me but no account Baileys tries to log in and WhatsApp rejects it as logged out.
   if (state.creds?.me && !state.creds.account) {
-    console.log(
-      "[whatsapp] previous pairing did not finish, starting a new one",
-    );
+    log.warn("Previous pairing did not finish, starting a new one");
     state.creds.me = undefined;
   }
   // Baileys' bundled WA Web version can be outdated and get rejected at pairing
   const { version } = await fetchLatestWaWebVersion();
-  console.log(`[whatsapp] using WA Web version ${version.join(".")}`);
-  const sock = makeWASocket({ auth: state, version });
+  log.info(
+    {
+      wa_version: version.join("."),
+    },
+    "Using WA Web version",
+  );
+  const sock = makeWASocket({
+    auth: state,
+    version,
+    // Baileys logs can carry customer JIDs, so they stay off unless debugging.
+    logger: logger.child(
+      { class: "baileys" },
+      { level: process.env.BAILEYS_LOG_LEVEL || "silent" },
+    ),
+  });
 
   // qr repeats every ~20s, a new pairing code each time would invalidate the one being typed
   let pairingCodeRequested = false;
@@ -55,9 +70,20 @@ const startWhatsApp = async ({
           pairingCodeRequested = true;
           try {
             const code = await sock.requestPairingCode(pairingNumber);
-            console.log(`[whatsapp] pairing code: ${code}`);
+            log.info(
+              {
+                pairing_code: code,
+              },
+              "Pairing code ready",
+            );
           } catch (error) {
-            console.error("[whatsapp] pairing code request failed:", error);
+            log.error(
+              {
+                err: error,
+                code: ERROR_CODES.WA_PAIRING_FAILED,
+              },
+              "Pairing code request failed",
+            );
           }
         }
       }
@@ -67,12 +93,12 @@ const startWhatsApp = async ({
         try {
           await onConnectionChange(connection);
         } catch (error) {
-          console.error("[whatsapp] connection handler failed:", error);
+          log.error({ err: error }, "Connection handler failed");
         }
       }
 
       if (connection === "open") {
-        console.log("[whatsapp] connected");
+        log.info("Connected to WhatsApp");
       }
 
       if (connection === "close") {
@@ -80,14 +106,16 @@ const startWhatsApp = async ({
 
         // Logged out from the phone: reconnecting would loop forever
         if (statusCode === DisconnectReason.loggedOut) {
-          console.log(
-            "[whatsapp] logged out, delete auth_info/ and scan again",
+          log.error(
+            { code: ERROR_CODES.WA_DISCONNECTED, reason: statusCode },
+            "Logged out, delete auth_info/ and pair again",
           );
           return;
         }
 
-        console.log(
-          `[whatsapp] connection closed (${statusCode}), reconnecting`,
+        log.warn(
+          { code: ERROR_CODES.WA_DISCONNECTED, reason: statusCode },
+          "Connection closed, reconnecting",
         );
         // A reconnect starts from scratch: every option must be passed again,
         // otherwise the new socket loses it (e.g. no age limit for offline messages)
@@ -97,7 +125,10 @@ const startWhatsApp = async ({
           pairingNumber,
           offlineMaxAgeMinutes,
         }).catch((error) => {
-          console.error("[whatsapp] reconnect failed:", error);
+          log.error(
+            { err: error, code: ERROR_CODES.WA_RECONNECT_FAILED },
+            "Reconnect failed",
+          );
         });
       }
     },
@@ -120,8 +151,12 @@ const startWhatsApp = async ({
         type === "append" &&
         isTooOld(incoming.sentAt, offlineMaxAgeMinutes)
       ) {
-        console.log(
-          `[whatsapp] skipped offline message ${incoming.providerMessageId} sent at ${incoming.sentAt.toISOString()}`,
+        log.info(
+          {
+            provider_message_id: incoming.providerMessageId,
+            sent_at: incoming.sentAt.toISOString(),
+          },
+          "Skipped offline message",
         );
         continue;
       }
@@ -130,7 +165,10 @@ const startWhatsApp = async ({
       try {
         await onMessage(incoming, sock);
       } catch (error) {
-        console.error("[whatsapp] message handler failed:", error);
+        log.error(
+          { err: error, provider_message_id: incoming.providerMessageId },
+          "Message handler failed",
+        );
       }
     }
   });

@@ -2,7 +2,10 @@ import {
   saveConnectionState,
   touchLastSeen,
 } from "../repositories/botStatusRepository.js";
+import logger from "../lib/logger.js";
+import ERROR_CODES from "../lib/errorCodes.js";
 
+const log = logger.child({ component: "heartbeat" });
 const BEAT_INTERVAL = 60 * 1000;
 
 // Only one heartbeat per process, however often the connection opens
@@ -13,7 +16,13 @@ const beat = async () => {
   try {
     await touchLastSeen();
   } catch (error) {
-    console.error("[heartbeat] failed to update last_seen_at:", error);
+    log.error(
+      {
+        err: error,
+        code: ERROR_CODES.HEARTBEAT_FAILED,
+      },
+      "Failed to update last_seen_at",
+    );
   }
 };
 
@@ -22,7 +31,13 @@ const trackConnection = async (connection) => {
   try {
     await saveConnectionState(connection);
   } catch (error) {
-    console.error("[heartbeat] failed to save connection state:", error);
+    log.error(
+      {
+        err: error,
+        code: ERROR_CODES.HEARTBEAT_FAILED,
+      },
+      "Failed to save connection state",
+    );
   }
 
   if (connection === "open") {
