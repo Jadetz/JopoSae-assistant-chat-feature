@@ -24,8 +24,8 @@ const REDACT_PATHS = [
   "err.detail",
 ];
 
-// Shared logger for the API and bot: one JSON line oer entry on stdout.
-// LOG_sOURCE comes from npm scripts (cross-env): "unknowns" means a script forgot it
+// Shared logger for the API and bot: one JSON line per entry on stdout.
+// LOG_SOURCE comes from npm scripts (cross-env): "unknowns" means a script forgot it
 
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",

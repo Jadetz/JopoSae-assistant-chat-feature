@@ -15,7 +15,7 @@ const ERROR_CODES = Object.freeze({
   // Bot process
   BOT_REPLY_FAILED: "bot.reply_failed",
   BOT_START_FAILED: "bot.start_failed",
-  // Backgroud jobs
+  // Background jobs
   SWEEPER_FAILED: "sweeper.failed",
   HEARTBEAT_FAILED: "heartbeat.failed",
   // Database
