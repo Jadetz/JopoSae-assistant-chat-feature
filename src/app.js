@@ -9,7 +9,7 @@ import notFoundHandler from "./middlewares/notFoundHandler.js";
 import errorHandler from "./middlewares/errorHandler.js";
 const app = express();
 
-// Comma-separated list ini DASHBOARD_ORIGIN. Empty means no other otigin is allowed
+// Comma-separated list in  DASHBOARD_ORIGIN. Empty means no other origin is allowed
 const allowedOrigins = (process.env.DASHBOARD_ORIGIN || "")
   .split(",")
   .map((origin) => origin.trim())
