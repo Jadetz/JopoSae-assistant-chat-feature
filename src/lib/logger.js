@@ -25,7 +25,7 @@ const REDACT_PATHS = [
 ];
 
 // Shared logger for the API and bot: one JSON line per entry on stdout.
-// LOG_SOURCE comes from npm scripts (cross-env): "unknowns" means a script forgot it
+// LOG_SOURCE comes from npm scripts (cross-env): "unknown" means a script forgot it
 
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",

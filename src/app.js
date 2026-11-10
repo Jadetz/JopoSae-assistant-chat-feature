@@ -41,7 +41,7 @@ app.get("/api/health/db", async (req, res) => {
   });
 });
 
-// Unknown routes, then every error; both must stay bellow all routes
+// Unknown routes, then every error; both must stay below all routes
 app.use(notFoundHandler);
 app.use(errorHandler);
 
