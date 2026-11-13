@@ -1,5 +1,5 @@
--- Migrations 001: dashboard admins and their login sessions (stage 2).
--- Apply once with: psql -v ON_ERROR_STOP=1 -f migration/001_admin_auth.sql.
+-- Migration 001: dashboard admins and their login sessions (stage 2).
+-- Apply once with: psql -v ON_ERROR_STOP=1 -f migrations/001_admin_auth.sql.
 -- The whole file is one transaction: if any statement fails, nothing is created.
 
 BEGIN;
