@@ -4,6 +4,7 @@ import pool from "./db.js";
 import faqRoutes from "./routes/faqRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
 import consultationRoutes from "./routes/consultationRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { sendSuccess } from "./lib/respond.js";
 import notFoundHandler from "./middlewares/notFoundHandler.js";
 import errorHandler from "./middlewares/errorHandler.js";
@@ -26,7 +27,7 @@ app.use(express.json());
 app.use("/api/faqs", faqRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/consultations", consultationRoutes);
-
+app.use("/api/auth", authRoutes);
 app.get("/", (req, res) => {
   sendSuccess(res, {
     message: "Server ok masseh.",

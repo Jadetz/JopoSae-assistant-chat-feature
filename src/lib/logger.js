@@ -13,6 +13,7 @@ const SENSITIVE_KEYS = [
   "token",
   "apiKey",
   "authorization",
+  "credential",
 ];
 
 // Top level, one level deep, plus pg error detail
