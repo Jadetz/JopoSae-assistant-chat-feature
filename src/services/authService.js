@@ -12,6 +12,7 @@ import {
   createSession,
   deleteSessionByTokenHash,
 } from "../repositories/adminSessionRepository.js";
+import { isAllowedGoogleAccount } from "../lib/googleAccountFilter.js";
 import ERROR_CODES from "../lib/errorCodes.js";
 const log = logger.child({
   component: "auth",
@@ -57,16 +58,14 @@ const loginWithGoogle = async (credential) => {
       UNVERIFIED_EMAIL_MESSAGE,
     );
   }
-  const allowedDomain = process.env.ALLOWED_GOOGLE_DOMAIN?.trim();
-  if (allowedDomain && identity.hd !== allowedDomain) {
+  const email = identity.email.trim().toLowerCase();
+  if (!isAllowedGoogleAccount(identity.hd, email)) {
     return reject(
       403,
       ERROR_CODES.AUTH_DOMAIN_NOT_ALLOWED,
       NOT_ALLOWED_MESSAGE,
     );
   }
-  const email = identity.email.trim().toLowerCase();
-
   // The token check above may wait on the network, so the transaction opens only now.
   return withTransaction(async (client) => {
     const admin =
