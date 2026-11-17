@@ -10,6 +10,7 @@ import {
 import {
   deleteExpiredSessions,
   createSession,
+  deleteSessionByTokenHash,
 } from "../repositories/adminSessionRepository.js";
 import ERROR_CODES from "../lib/errorCodes.js";
 const log = logger.child({
@@ -123,4 +124,14 @@ const loginWithGoogle = async (credential) => {
     };
   });
 };
-export { loginWithGoogle };
+// Deletes the session behind this cookie value, if any. Safe to call twice.
+const logoutSession = async (token) => {
+  if (typeof token !== "string" || token === "") {
+    return;
+  }
+  const adminId = await deleteSessionByTokenHash(hashSessionToken(token));
+  if (adminId) {
+    log.info({ admin_id: adminId }, "Admin signed out");
+  }
+};
+export { loginWithGoogle, logoutSession };

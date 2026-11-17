@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import pool from "./db.js";
 import faqRoutes from "./routes/faqRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
@@ -8,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import { sendSuccess } from "./lib/respond.js";
 import notFoundHandler from "./middlewares/notFoundHandler.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import requireAdmin from "./middlewares/requireAdmin.js";
 const app = express();
 
 // Comma-separated list in DASHBOARD_ORIGIN. Empty means no other origin is allowed
@@ -23,10 +25,12 @@ app.use(
   }),
 );
 app.use(express.json());
+app.use(cookieParser());
 // endpoint call
-app.use("/api/faqs", faqRoutes);
-app.use("/api/services", serviceRoutes);
-app.use("/api/consultations", consultationRoutes);
+// Data routes need a signed-in admin: /api/auth/google, /api/auth/logout, /api/health/db, and / stay public.
+app.use("/api/faqs", requireAdmin, faqRoutes);
+app.use("/api/services", requireAdmin, serviceRoutes);
+app.use("/api/consultations", requireAdmin, consultationRoutes);
 app.use("/api/auth", authRoutes);
 app.get("/", (req, res) => {
   sendSuccess(res, {

@@ -27,6 +27,7 @@ const ERROR_CODES = Object.freeze({
   AUTH_NOT_REGISTERED: "auth.not_registered",
   AUTH_ACCOUNT_MISMATCH: "auth.account_mismatch",
   AUTH_ACCESS_REVOKED: "auth.access_revoked",
+  AUTH_SESSION_REQUIRED: "auth.session_required",
 });
 
 export default ERROR_CODES;
