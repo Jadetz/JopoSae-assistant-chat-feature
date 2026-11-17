@@ -20,6 +20,14 @@ const ERROR_CODES = Object.freeze({
   HEARTBEAT_FAILED: "heartbeat.failed",
   // Database
   DB_POOL_ERROR: "db.pool_error",
+  // Dashboard login
+  AUTH_INVALID_TOKEN: "auth.invalid_token",
+  AUTH_EMAIL_UNVERIFIED: "auth.email_unverified",
+  AUTH_DOMAIN_NOT_ALLOWED: "auth.domain_not_allowed",
+  AUTH_NOT_REGISTERED: "auth.not_registered",
+  AUTH_ACCOUNT_MISMATCH: "auth.account_mismatch",
+  AUTH_ACCESS_REVOKED: "auth.access_revoked",
+  AUTH_SESSION_REQUIRED: "auth.session_required",
 });
 
 export default ERROR_CODES;

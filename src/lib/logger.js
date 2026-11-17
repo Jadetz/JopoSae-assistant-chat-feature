@@ -13,6 +13,8 @@ const SENSITIVE_KEYS = [
   "token",
   "apiKey",
   "authorization",
+  "credential",
+  "cookie",
 ];
 
 // Top level, one level deep, plus pg error detail
@@ -22,6 +24,10 @@ const REDACT_PATHS = [
   ...SENSITIVE_KEYS,
   ...SENSITIVE_KEYS.map((key) => `*.${key}`),
   "err.detail",
+  // Request and response headers carry the raw session token.
+  "req.headers.cookie",
+  'headers["set-cookie"]',
+  'res.headers["set-cookie"]',
 ];
 
 // Shared logger for the API and bot: one JSON line per entry on stdout.
